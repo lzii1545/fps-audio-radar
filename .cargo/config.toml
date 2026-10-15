@@ -1,0 +1,16 @@
+# 链接配置（gnullvm 工具链，无需外部 mingw）：
+# - rust-lld：工具链自带的 LLVM 链接器
+# - link-self-contained：使用 rust 自带 CRT 对象与基础导入库
+# - 追加 windows-gnu 工具链的 self-contained 目录（rust-mingw 组件提供的完整导入库，
+#   gdi32/ole32/opengl32/shell32 等）
+# - 追加 tools/mingw-libs（由 windows-targets 分区库复制出的 DirectX/shlwapi 别名库）
+#
+# 注意：下面 windows-gnu self-contained 目录为本机绝对路径，其他机器请按自己
+# rustup 安装位置调整；有 MSVC 工具链的机器可直接 cargo build --release，无需本配置。
+[target.x86_64-pc-windows-gnullvm]
+rustflags = [
+    "-Clinker=rust-lld",
+    "-Clink-self-contained=on",
+    "-Clink-arg=-LC:\\Users\\ASUS\\.rustup\\toolchains\\stable-x86_64-pc-windows-gnu\\lib\\rustlib\\x86_64-pc-windows-gnu\\lib\\self-contained",
+    "-Clink-arg=-Ltools/mingw-libs",
+]

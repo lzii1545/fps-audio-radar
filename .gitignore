@@ -1,0 +1,10 @@
+/target
+/dist
+*.pdb
+*.png
+*.log
+*.zip
+*.o
+*.rcgu.o
+.idea/
+.vscode/
