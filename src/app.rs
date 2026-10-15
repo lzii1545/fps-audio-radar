@@ -351,13 +351,13 @@ fn title_bar(
                 p.text(
                     Pos2::new(dot_x + 168.0, full.center().y),
                     Align2::LEFT_CENTER,
-                    "位置调整中 · 拖拽元素，点右上角绿色按钮完成",
+                    "位置调整中 · 点右上角绿色按钮完成",
                     FontId::proportional(11.5),
                     YELLOW,
                 );
             }
 
-            // 右侧：VU + 最小化 + 关闭
+            // 右侧：VU + 最小化 + 关闭（VU 与按钮之间留出间距，绝不重叠）
             let close_rect = Rect::from_center_size(
                 Pos2::new(full.right() - 22.0, full.center().y),
                 egui::vec2(30.0, 28.0),
@@ -366,12 +366,14 @@ fn title_bar(
                 Pos2::new(full.right() - 56.0, full.center().y),
                 egui::vec2(30.0, 28.0),
             );
+            // VU：以「数字右端 = 最小化按钮左边缘 - 12px」为锚点反向排布
             vu_at(
                 ui,
                 ctx,
                 anim,
-                Pos2::new(min_rect.left() - 4.0, full.center().y),
-                120.0,
+                min_rect.left() - 12.0,
+                full.center().y,
+                84.0,
                 level,
                 peak,
             );
@@ -422,13 +424,21 @@ fn vu_at(
     ui: &egui::Ui,
     ctx: &egui::Context,
     anim: &mut Animator,
-    pos: Pos2,
+    text_end_x: f32,
+    y: f32,
     width: f32,
     level: f32,
     peak: f32,
 ) {
     let disp = anim.get(ctx, egui::Id::new("vu_level"), level, 25.0);
-    let rect = Rect::from_center_size(pos, egui::vec2(width, 12.0));
+    // 以 text_end_x 为右边界反向排布：数字 | 间距 | 电平条
+    let text_w = 54.0;
+    let gap = 6.0;
+    let bar_right = text_end_x - text_w - gap;
+    let rect = Rect::from_min_max(
+        Pos2::new(bar_right - width, y - 6.0),
+        Pos2::new(bar_right, y + 6.0),
+    );
     let p = ui.painter();
     p.rect_filled(rect, 6.0, BG3);
     let frac = ((disp + 60.0) / 60.0).clamp(0.0, 1.0);
@@ -452,8 +462,8 @@ fn vu_at(
         Stroke::new(1.5, TEXT_DIM),
     );
     p.text(
-        Pos2::new(rect.right() + 7.0, pos.y),
-        Align2::LEFT_CENTER,
+        Pos2::new(text_end_x, y),
+        Align2::RIGHT_CENTER,
         format!("{disp:>5.1} dB"),
         FontId::monospace(10.0),
         TEXT_DIM,
